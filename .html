@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Food Donation Coordinator</title>
+    <!-- Tailwind CSS for modern, responsive UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- Navbar -->
+    <header class="bg-emerald-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">FoodShare Coordinator</h1>
+            <nav class="space-x-4">
+                <button onclick="switchTab('donor')" id="btn-donor" class="px-3 py-2 rounded bg-emerald-700 font-medium">Donor Portal</button>
+                <button onclick="switchTab('recipient')" id="btn-recipient" class="px-3 py-2 rounded hover:bg-emerald-700 font-medium">NGO Feed</button>
+                <button onclick="switchTab('admin')" id="btn-admin" class="px-3 py-2 rounded hover:bg-emerald-700 font-medium">Admin Panel</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-6 py-8">
+
+        <!-- 1. DONOR TAB -->
+        <section id="tab-donor" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-6 text-emerald-600">Post Surplus Food</h2>
+            <form id="donationForm" onsubmit="handleDonationSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block font-medium mb-1">Food Item(s) & Description</label>
+                    <input type="text" id="foodItem" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 20 Veg Meals / Rice & Curry">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Quantity (Servings)</label>
+                        <input type="number" id="foodQuantity" required min="1" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 20">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Expiry / Best Before</label>
+                        <input type="datetime-local" id="foodExpiry" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Pickup Address</label>
+                    <input type="text" id="foodAddress" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Block A, Main Street">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2 rounded hover:bg-emerald-700 transition">Submit Donation</button>
+            </form>
+        </section>
+
+        <!-- 2. RECIPIENT TAB -->
+        <section id="tab-recipient" class="hidden max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-6 text-emerald-600">Available Donations for NGOs</h2>
+            <div id="donationsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dynamic cards injected via JavaScript -->
+            </div>
+        </section>
+
+        <!-- 3. ADMIN TAB -->
+        <section id="tab-admin" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-6 text-emerald-600">Admin Control Panel</h2>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-emerald-50 p-4 rounded text-center border border-emerald-200">
+                    <p class="text-gray-500 text-sm">Total Posts</p>
+                    <p id="statTotal" class="text-2xl font-bold text-emerald-600">0</p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded text-center border border-amber-200">
+                    <p class="text-gray-500 text-sm">Active Claims</p>
+                    <p id="statClaimed" class="text-2xl font-bold text-amber-600">0</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded text-center border border-blue-200">
+                    <p class="text-gray-500 text-sm">Completed</p>
+                    <p id="statCompleted" class="text-2xl font-bold text-blue-600">0</p>
+                </div>
+            </div>
+            <h3 class="text-lg font-medium mb-3">All Registered Records</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b">
+                            <th class="p-3">Item</th>
+                            <th class="p-3">Servings</th>
+                            <th class="p-3">Location</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <!-- Dynamic rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Local state simulation (or can use localStorage)
+        let donations = [
+            { id: 1, item: "Vegetable Biryani", quantity: 15, expiry: "2026-06-07 20:00", address: "Downtown Cafe, Sector 4", status: "Available" },
+            { id: 2, item: "Fresh Bakery Bread & Buns", quantity: 30, expiry: "2026-06-08 12:00", address: "City Bakers, Market Road", status: "Available" }
+        ];
+
+        function switchTab(tabName) {
+            document.getElementById('tab-donor').classList.add('hidden');
+            document.getElementById('tab-recipient').classList.add('hidden');
+            document.getElementById('tab-admin').classList.add('hidden');
+
+            document.getElementById('btn-donor').className = "px-3 py-2 rounded hover:bg-emerald-700 font-medium";
+            document.getElementById('btn-recipient').className = "px-3 py-2 rounded hover:bg-emerald-700 font-medium";
+            document.getElementById('btn-admin').className = "px-3 py-2 rounded hover:bg-emerald-700 font-medium";
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabName}`).className = "px-3 py-2 rounded bg-emerald-700 font-medium";
+
+            if (tabName === 'recipient') renderRecipientFeed();
+            if (tabName === 'admin') renderAdminPanel();
+        }
+
+        function handleDonationSubmit(event) {
+            event.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                item: document.getElementById('foodItem').value,
+                quantity: document.getElementById('foodQuantity').value,
+                expiry: document.getElementById('foodExpiry').value,
+                address: document.getElementById('foodAddress').value,
+                status: "Available"
+            };
+
+            donations.push(newItem);
+            alert("Donation posted successfully!");
+            document.getElementById('donationForm').reset();
+            switchTab('recipient');
+        }
+
+        function renderRecipientFeed() {
+            const feedContainer = document.getElementById('donationsList');
+            feedContainer.innerHTML = "";
+
+            const availableItems = donations.filter(d => d.status === "Available");
+            if (availableItems.length === 0) {
+                feedContainer.innerHTML = `<p class="text-gray-500 col-span-2 text-center py-6">No food items currently available.</p>`;
+                return;
+            }
+
+            availableItems.forEach(d => {
+                feedContainer.innerHTML += `
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded font-semibold">Available</span>
+                            <h3 class="text-xl font-bold mt-2">${d.item}</h3>
+                            <p class="text-gray-600 mt-1">Servings: <strong>${d.quantity}</strong></p>
+                            <p class="text-gray-600">Location: ${d.address}</p>
+                            <p class="text-sm text-gray-500 mt-2">Expires: ${d.expiry}</p>
+                        </div>
+                        <button onclick="claimDonation(${d.id})" class="mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition font-medium">Claim Donation</button>
+                    </div>
+                `;
+            });
+        }
+
+        function claimDonation(id) {
+            const item = donations.find(d => d.id === id);
+            if (item) {
+                item.status = "Claimed";
+                alert("Donation claimed successfully! Our volunteer team will coordinate pickup.");
+                renderRecipientFeed();
+            }
+        }
+
+        function renderAdminPanel() {
+            document.getElementById('statTotal').innerText = donations.length;
+            document.getElementById('statClaimed').innerText = donations.filter(d => d.status === "Claimed").length;
+            document.getElementById('statCompleted').innerText = donations.filter(d => d.status === "Completed").length;
+
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = "";
+            donations.forEach(d => {
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-3 font-medium">${d.item}</td>
+                        <td class="p-3">${d.quantity}</td>
+                        <td class="p-3">${d.address}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded text-xs font-semibold ${d.status === 'Available' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                ${d.status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
